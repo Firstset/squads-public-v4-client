@@ -4,3 +4,4 @@ dist/
 squads-public-verify/
 .env
 .env.local
+.vercel
