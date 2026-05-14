@@ -2,14 +2,17 @@ import * as multisig from '@sqds/multisig';
 // top level
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 
-const DEFAULT_RPC_URL = 'https://api.mainnet-beta.solana.com'; // Default fallback
-
-const getRpcUrl = () => {
-  if (typeof document !== 'undefined') {
-    return localStorage.getItem('x-rpc-url') || DEFAULT_RPC_URL;
-  }
-  return DEFAULT_RPC_URL;
+const readStoredOrSeed = (storageKey: string, defaultValue: string) => {
+  if (typeof window === 'undefined') return defaultValue;
+  const stored = localStorage.getItem(storageKey);
+  if (stored) return stored;
+  localStorage.setItem(storageKey, defaultValue);
+  return defaultValue;
 };
+
+const DEFAULT_RPC_URL = process.env.DEFAULT_RPC_URL || 'https://api.mainnet.solana.com';
+
+const getRpcUrl = () => readStoredOrSeed('x-rpc-url', DEFAULT_RPC_URL);
 
 export const useRpcUrl = () => {
   const queryClient = useQueryClient();
@@ -32,14 +35,9 @@ export const useRpcUrl = () => {
   return { rpcUrl, setRpcUrl };
 };
 
-const DEFAULT_PROGRAM_ID = multisig.PROGRAM_ID.toBase58();
+const DEFAULT_PROGRAM_ID = process.env.DEFAULT_PROGRAM_ID || multisig.PROGRAM_ID.toBase58();
 
-const getProgramId = () => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('x-program-id-v4') || DEFAULT_PROGRAM_ID;
-  }
-  return DEFAULT_PROGRAM_ID;
-};
+const getProgramId = () => readStoredOrSeed('x-program-id-v4', DEFAULT_PROGRAM_ID);
 
 export const useProgramId = () => {
   const queryClient = useQueryClient();
@@ -62,13 +60,9 @@ export const useProgramId = () => {
 };
 
 // explorer url
-const DEFAULT_EXPLORER_URL = 'https://explorer.solana.com';
-const getExplorerUrl = () => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('x-explorer-url') || DEFAULT_EXPLORER_URL;
-  }
-  return DEFAULT_EXPLORER_URL;
-};
+const DEFAULT_EXPLORER_URL = process.env.DEFAULT_EXPLORER_URL || 'https://explorer.solana.com';
+
+const getExplorerUrl = () => readStoredOrSeed('x-explorer-url', DEFAULT_EXPLORER_URL);
 
 export const useExplorerUrl = () => {
   const queryClient = useQueryClient();

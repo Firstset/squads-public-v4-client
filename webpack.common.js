@@ -1,7 +1,45 @@
 const path = require('path');
+const fs = require('fs');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const webpack = require('webpack');
+
+const CONFIGURABLE_ENV_KEYS = [
+  'DEFAULT_RPC_URL',
+  'DEFAULT_PROGRAM_ID',
+  'DEFAULT_EXPLORER_URL',
+  'DEFAULT_MULTISIG_ADDRESS',
+];
+
+function parseDotEnvFile(filename) {
+  const filePath = path.resolve(__dirname, filename);
+  if (!fs.existsSync(filePath)) return {};
+  const parsed = {};
+  for (const rawLine of fs.readFileSync(filePath, 'utf8').split('\n')) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith('#')) continue;
+    const eq = line.indexOf('=');
+    if (eq === -1) continue;
+    const key = line.slice(0, eq).trim();
+    let value = line.slice(eq + 1).trim();
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+    parsed[key] = value;
+  }
+  return parsed;
+}
+
+// Precedence: real process.env (e.g. Vercel) > .env.local > .env > built-in fallback.
+const dotenv = { ...parseDotEnvFile('.env'), ...parseDotEnvFile('.env.local') };
+const definedEnv = {};
+for (const key of CONFIGURABLE_ENV_KEYS) {
+  const value = process.env[key] ?? dotenv[key] ?? '';
+  definedEnv[`process.env.${key}`] = JSON.stringify(value);
+}
 
 module.exports = {
   entry: './src/index.tsx',
@@ -55,5 +93,6 @@ module.exports = {
       process: 'process/browser.js',
       Buffer: ['buffer', 'Buffer'],
     }),
+    new webpack.DefinePlugin(definedEnv),
   ],
 };
