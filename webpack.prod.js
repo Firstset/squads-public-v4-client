@@ -16,6 +16,7 @@ module.exports = merge(common, {
   },
   parallelism: 1,
   devtool: false,
+  performance: { hints: false },
   plugins: [
     new CopyWebpackPlugin({
       patterns: [{ from: 'public', to: '.', globOptions: { ignore: ['**/index.html'] } }],
