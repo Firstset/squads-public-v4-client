@@ -9,6 +9,7 @@ const CONFIGURABLE_ENV_KEYS = [
   'DEFAULT_PROGRAM_ID',
   'DEFAULT_EXPLORER_URL',
   'DEFAULT_MULTISIG_ADDRESS',
+  'FRONTEND_AUTH_SECRET',
 ];
 
 function parseDotEnvFile(filename) {
