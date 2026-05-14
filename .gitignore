@@ -2,3 +2,5 @@ node_modules/
 dist/
 .idea/
 squads-public-verify/
+.env
+.env.local
